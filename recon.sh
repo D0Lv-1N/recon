@@ -1,84 +1,76 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# =========================
+# =====================
 # CONFIG
-# =========================
+# =====================
 BASE_DIR="$HOME/recon"
-STATE_DIR="$BASE_DIR/state"
+TARGETS="$BASE_DIR/targets.txt"
+
+BASE="$BASE_DIR/sub.txt"
+SCAN="$BASE_DIR/scan.txt"
+NEW="$BASE_DIR/new.txt"
+HTTP="$BASE_DIR/new.http"
+
 TG_ID="mytg"
 POPUP="$BASE_DIR/notify_wrapper.sh"
 
-# =========================
-# LOOP DOMAIN
-# =========================
-while IFS= read -r DOMAIN || [ -n "$DOMAIN" ]; do
-  [ -z "$DOMAIN" ] && continue
+mkdir -p "$BASE_DIR"
 
-  DDIR="$STATE_DIR/$DOMAIN"
-  SUB="$DDIR/sub.txt"     # baseline
-  SCAN="$DDIR/scan.txt"  # live scan
-  NEW="$DDIR/new.txt"
-  HTTP="$DDIR/new.http"
+# =====================
+# ENUMERATION (LIST MODE)
+# =====================
+TMP="$BASE_DIR/tmp.txt"
+: > "$TMP"
 
-  mkdir -p "$DDIR"
+subfinder -t 9999 -silent -dL "$TARGETS" >> "$TMP"
+assetfinder --subs-only < "$TARGETS" >> "$TMP"
+findomain -f "$TARGETS" 2>/dev/null >> "$TMP"
 
-  # =========================
-  # ENUM SUBDOMAIN → scan.txt
-  # =========================
-  TMP="$DDIR/tmp.txt"
-  : > "$TMP"
+sort -u "$TMP" > "$SCAN"
+rm -f "$TMP"
 
-  subfinder -silent -d "$DOMAIN" >> "$TMP"
-  assetfinder --subs-only "$DOMAIN" >> "$TMP"
-  findomain -t "$DOMAIN" 2>/dev/null | grep -E "\.${DOMAIN}$" >> "$TMP"
+# =====================
+# FIRST RUN → CREATE BASELINE
+# =====================
+if [ ! -f "$BASE" ]; then
+  cp "$SCAN" "$BASE"
+  echo "[INIT] Baseline created"
+  exit 0
+fi
 
-  sort -u "$TMP" > "$SCAN"
-  rm -f "$TMP"
+# =====================
+# COMPARE
+# =====================
+comm -13 <(sort -u "$BASE") <(sort -u "$SCAN") > "$NEW"
 
-  # =========================
-  # FIRST RUN (NO BASELINE)
-  # =========================
-  if [ ! -f "$SUB" ]; then
-    cp "$SCAN" "$SUB"
-    echo "[INIT] Baseline created for $DOMAIN"
-    continue
-  fi
+# =====================
+# IF NEW FOUND
+# =====================
+if [ -s "$NEW" ]; then
+  httpx -silent -t 9999 -sc -l "$NEW" > "$HTTP" || true
 
-  # =========================
-  # COMPARE scan vs sub
-  # =========================
-  comm -13 <(sort -u "$SUB") <(sort -u "$SCAN") > "$NEW"
-
-  # =========================
-  # IF NEW SUBDOMAIN FOUND
-  # =========================
-  if [ -s "$NEW" ]; then
-    httpx -silent -sc -l "$NEW" > "$HTTP" || true
-
-    # --- TELEGRAM ---
-    if [ -s "$HTTP" ]; then
-      notify -silent -id "$TG_ID" \
-        -i "$HTTP" \
-        -mf "🎯 $DOMAIN\n🆕 {{data}}\n⏰ $(date '+%F %T')"
-    else
-      notify -silent -id "$TG_ID" \
-        -mf "🎯 $DOMAIN\n🆕 Subdomain baru:\n$(cat $NEW)\n⏰ $(date '+%F %T')"
-    fi
-
-    # --- DESKTOP POPUP ---
-    MSG=$( [ -s "$HTTP" ] && cat "$HTTP" || cat "$NEW" )
-    "$POPUP" "🎯 $DOMAIN" "🆕 Subdomain baru:\n$MSG"
-
-    # update baseline
-    cat "$NEW" >> "$SUB"
-    sort -u "$SUB" -o "$SUB"
-
+  # --- TELEGRAM ---
+  if [ -s "$HTTP" ]; then
+    notify -silent -id "$TG_ID" \
+      -i "$HTTP" \
+      -mf "🎯 NEW ASSET\n🆕 {{data}}\n⏰ $(date '+%F %T')"
   else
-    # =========================
-    # NO NEW SUBDOMAIN
-    # =========================
-    "$POPUP" "🎯 $DOMAIN" "✅ Tidak ada subdomain baru"
+    notify -silent -id "$TG_ID" \
+      -mf "🎯 NEW ASSET\n🆕 $(cat $NEW)\n⏰ $(date '+%F %T')"
   fi
 
-done < "$BASE_DIR/targets.txt"
+  # --- DESKTOP ---
+  MSG=$( [ -s "$HTTP" ] && cat "$HTTP" || cat "$NEW" )
+  "$POPUP" "🎯 Recon" "🆕 Subdomain baru:\n$MSG"
+
+  # update baseline
+  cat "$NEW" >> "$BASE"
+  sort -u "$BASE" -o "$BASE"
+
+else
+  # =====================
+  # NO NEW
+  # =====================
+  "$POPUP" "🎯 Recon" "✅ Tidak ada subdomain baru"
+fi
