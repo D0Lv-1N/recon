@@ -9,6 +9,9 @@ chmod +x *.sh
 mkdir state
 ./setup.sh
 ```
+# NOTIFY TOOLS
+Read the complete guide on how to set up notify here: https://github.com/projectdiscovery/notify
+
 # CRONTAB SETUP
 
 The line you add to `crontab -e` looks like this right now:
