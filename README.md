@@ -1,19 +1,23 @@
 ### AUTOMATIC RECON USING CRONTAB
 
+
+# INSTALATION
 ```
 git clone https://github.com/D0Lv-1N/recon.git
 cd recon
-chmod +x recon.sh
+chmod +x *.sh
 mkdir state
+./setup.sh
 ```
 
-create crontab with command:
+# create crontab with command:
 ```
 crontab -e
 ```
-#fill the file with:
+# fill the file crontab with
+note:replace 'ubuntu' with the linux os username
 ```
-@reboot sleep (use persecond format) && /bin/bash /home/(your user)/recon/recon.sh >> /home/dolvin/recon/cron.log 2>&1
+@reboot sleep 120 && /bin/bash /home/ubuntu/recon/recon.sh >> /home/ubuntu/recon/cron.log 2>&1
 
 ```
 Enter the target domain in the targets.txt file
