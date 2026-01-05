@@ -29,17 +29,12 @@ while IFS= read -r DOMAIN || [ -n "$DOMAIN" ]; do
   TMP="$DDIR/tmp.txt"
   : > "$TMP"
 
-  subfinder -t 999 -silent -d "$DOMAIN" >> "$TMP"
+  subfinder -silent -d "$DOMAIN" >> "$TMP"
   assetfinder --subs-only "$DOMAIN" >> "$TMP"
   findomain -t "$DOMAIN" 2>/dev/null | grep -E "\.${DOMAIN}$" >> "$TMP"
 
-   SCAN_RAW="$DDIR/scan_raw.txt"
-
-sort -u "$TMP" > "$SCAN_RAW"
-rm -f "$TMP"
-
-dnsx -silent -resp -l "$SCAN_RAW" > "$SCAN"
-rm -f "$SCAN_RAW"
+  sort -u "$TMP" > "$SCAN"
+  rm -f "$TMP"
 
   # =========================
   # FIRST RUN (NO BASELINE)
@@ -59,7 +54,7 @@ rm -f "$SCAN_RAW"
   # IF NEW SUBDOMAIN FOUND
   # =========================
   if [ -s "$NEW" ]; then
-    httpx -silent -t 999 -sc -l "$NEW" > "$HTTP" || true
+    httpx -silent -sc -l "$NEW" > "$HTTP" || true
 
     # --- TELEGRAM ---
     if [ -s "$HTTP" ]; then
@@ -87,4 +82,3 @@ rm -f "$SCAN_RAW"
   fi
 
 done < "$BASE_DIR/targets.txt"
-
