@@ -11,7 +11,9 @@ mkdir state
 ```
 # NOTIFY TOOLS
 Read the complete guide on how to set up notify here: https://github.com/projectdiscovery/notify
+
 create config yaml
+
 $ nano ~/.config/notify/provider-config.yaml
 ```
 telegram:
