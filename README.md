@@ -11,7 +11,13 @@ mkdir state
 ```
 # NOTIFY TOOLS
 Read the complete guide on how to set up notify here: https://github.com/projectdiscovery/notify
-
+create config yaml $ nano /home/<user>/.config/notify/provider-config.yaml
+```
+telegram:
+  - id: mytg
+    telegram_api_key: <YOUR TELEGRAM APIKEY>
+    telegram_chat_id: <YOUR CHAT ID>
+```
 # CRONTAB SETUP
 
 The line you add to `crontab -e` looks like this right now:
