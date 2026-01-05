@@ -11,7 +11,8 @@ mkdir state
 ```
 # NOTIFY TOOLS
 Read the complete guide on how to set up notify here: https://github.com/projectdiscovery/notify
-create config yaml $ nano /home/<user>/.config/notify/provider-config.yaml
+create config yaml
+$ nano /home/<user>/.config/notify/provider-config.yaml
 ```
 telegram:
   - id: mytg
