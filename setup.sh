@@ -38,6 +38,17 @@ install_subfinder() {
     fi
 }
 
+# ── Instalasi dnsx (skip jika sudah ada) ─────────────────────
+install_dnsx() {
+    if command_exists dnsx; then
+        print_info "dnsx already installed, skipping"
+    else
+        print_info "Installing dnsx..."
+        go install -v github.com/projectdiscovery/dnsx/cmd/dnsx@latest
+        sudo mv ~/go/bin/dnsx /usr/local/bin/ && print_success "dnsx installed"
+    fi
+}
+
 # ── Instalasi httpx (skip jika sudah ada) ─────────────────────
 install_httpx() {
     if command_exists httpx; then
