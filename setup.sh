@@ -60,6 +60,16 @@ install_httpx() {
     fi
 }
 
+install_notify() {
+    if command -v notify >/dev/null 2>&1; then
+        print_info "notify already installed, skipping"
+    else
+        print_info "Installing notify..."
+        go install -v github.com/projectdiscovery/notify/cmd/notify@latest
+        sudo mv ~/go/bin/notify /usr/local/bin/ && print_success "notify installed"
+    fi
+}
+
 # ── Instalasi assetfinder (auto cek OS & arsitektur) ───────
 install_assetfinder() {
     if command_exists assetfinder; then
@@ -119,7 +129,7 @@ install_findomain() {
 # ── Verifikasi semua tools terinstal ───────────────────────
 verify_tools() {
     local missing=0
-    for tool in subfinder httpx assetfinder findomain; do
+    for tool in subfinder assetfinder findomain dnsx httpx notify; do
         if ! command_exists "$tool"; then
             print_error "$tool not installed"
             missing=1
@@ -146,6 +156,8 @@ main() {
     }
     detect_os
     check_go
+    install_notify
+    install_dnsx
     install_subfinder
     install_httpx
     install_assetfinder
