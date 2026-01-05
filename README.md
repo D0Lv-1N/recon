@@ -9,7 +9,7 @@ chmod +x *.sh
 mkdir state
 ./setup.sh
 ```
-Changing the Crontab Schedule
+# CRONTAB SETUP
 
 The line you add to `crontab -e` looks like this right now:
 
