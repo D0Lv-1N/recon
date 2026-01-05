@@ -38,16 +38,6 @@ install_subfinder() {
     fi
 }
 
-# ── Instalasi dnsx (skip jika sudah ada) ─────────────────────
-install_dnsx() {
-    if command_exists dnsx; then
-        print_info "dnsx already installed, skipping"
-    else
-        print_info "Installing dnsx..."
-        go install -v github.com/projectdiscovery/dnsx/cmd/dnsx@latest
-        sudo mv ~/go/bin/dnsx /usr/local/bin/ && print_success "dnsx installed"
-    fi
-}
 
 # ── Instalasi httpx (skip jika sudah ada) ─────────────────────
 install_httpx() {
@@ -70,61 +60,6 @@ install_notify() {
     fi
 }
 
-# ── Instalasi assetfinder (auto cek OS & arsitektur) ───────
-install_assetfinder() {
-    if command_exists assetfinder; then
-        print_info "assetfinder already installed, skipping"
-        return
-    fi
-
-    print_info "Installing assetfinder..."
-    ARCH=$(uname -m)
-    case "$ARCH" in
-        x86_64*) ARCH="amd64" ;;
-        aarch64*) ARCH="arm64" ;;
-        *) print_error "Unsupported architecture"; exit 1 ;;
-    esac
-
-    URL="https://github.com/tomnomnom/assetfinder/releases/download/v0.1.1/assetfinder-linux-${ARCH}-0.1.1.tgz"
-    print_info "Downloading assetfinder from $URL"
-    curl -L -o assetfinder.tgz "$URL"
-    tar -xzf assetfinder.tgz
-    sudo mv assetfinder /usr/local/bin/ && print_success "assetfinder installed"
-    rm -f assetfinder.tgz
-}
-
-# ── Instalasi findomain (auto cek OS & arsitektur) ───────
-install_findomain() {
-    if command_exists findomain; then
-        print_info "findomain already installed, skipping"
-        return
-    fi
-
-    print_info "Installing findomain..."
-    ARCH=$(uname -m)
-    case "$ARCH" in
-        x86_64*) ARCH="x86_64" ;;
-        aarch64*) ARCH="arm64" ;;
-        i386*|i686*) ARCH="i386" ;;
-        *) print_error "Unsupported architecture for findomain"; exit 1 ;;
-    esac
-
-    if [[ "$OS" == "linux" ]]; then
-        URL="https://github.com/findomain/findomain/releases/latest/download/findomain-linux-${ARCH}.zip"
-    elif [[ "$OS" == "macos" ]]; then
-        URL="https://github.com/findomain/findomain/releases/latest/download/findomain-macos-${ARCH}.zip"
-    else
-        print_error "findomain not supported on $OS"
-        exit 1
-    fi
-
-    print_info "Downloading findomain from $URL"
-    curl -LO "$URL"
-    unzip findomain*.zip
-    chmod +x findomain
-    sudo mv findomain /usr/local/bin/ && print_success "findomain installed"
-    rm -f findomain*.zip
-}
 
 # ── Verifikasi semua tools terinstal ───────────────────────
 verify_tools() {
@@ -157,11 +92,8 @@ main() {
     detect_os
     check_go
     install_notify
-    install_dnsx
     install_subfinder
     install_httpx
-    install_assetfinder
-    install_findomain
     verify_tools
     print_success "All tools installed successfully!"
     print_info "You can now run: ./recon.sh"
