@@ -24,8 +24,6 @@ TMP="$BASE_DIR/tmp.txt"
 : > "$TMP"
 
 subfinder -t 9999 -silent -dL "$TARGETS" >> "$TMP"
-assetfinder -subs-only < "$TARGETS" >> "$TMP"
-findomain -f "$TARGETS" 2>/dev/null >> "$TMP"
 
 sort -u "$TMP" > "$SCAN"
 rm -f "$TMP"
