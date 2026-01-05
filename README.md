@@ -97,6 +97,8 @@ If you want the script to run **both** at a fixed daily time **and** after a reb
 
 ### 6. Quick reference cheat‑sheet
 
+| Desired schedule | Crontab expression | Explanation |
+|------------------|--------------------|-------------|
 | Every 5 minutes | `*/5 * * * * /path/to/script.sh` | Runs at minute 0,5,10,… of every hour |
 | Every hour at minute 15 | `15 * * * * /path/to/script.sh` | At 01:15, 02:15, 03:15, … |
 | Daily at 04:00 AM | `0 4 * * * /path/to/script.sh` | Once per day at 04:00 |
@@ -113,4 +115,8 @@ If you want the script to run **both** at a fixed daily time **and** after a reb
 - **Multiple schedules** → add separate lines for each pattern.  
 
 Just open `crontab -e`, modify the line(s), save, and you’re done. Happy recon!
-Enter the target domain in the targets.txt file
+
+
+# Targets
+- Edit the `targets.txt` file and list the domains you want the recon to monitor.  
+- Each line in `targets.txt` should contain one domain name.
