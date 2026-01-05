@@ -6,7 +6,6 @@
 git clone https://github.com/D0Lv-1N/recon.git
 cd recon
 chmod +x *.sh
-mkdir state
 ./setup.sh
 ```
 # NOTIFY TOOLS
