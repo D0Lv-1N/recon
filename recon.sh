@@ -53,7 +53,7 @@ if [ -s "$NEW" ]; then
   # --- TELEGRAM ---
   if [ -s "$HTTP" ]; then
     notify -silent -id "$TG_ID" \
-      -i "$HTTP" \
+      -data "$HTTP" \
       -mf "🎯 NEW ASSET\n🆕 {{data}}\n⏰ $(date '+%F %T')"
   else
     notify -silent -id "$TG_ID" \
