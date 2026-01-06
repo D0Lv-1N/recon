@@ -20,13 +20,10 @@ mkdir -p "$BASE_DIR"
 # =====================
 # ENUMERATION (LIST MODE)
 # =====================
-TMP="$BASE_DIR/tmp.txt"
-: > "$TMP"
-
-subfinder -t 9999 -silent -dL "$TARGETS" >> "$TMP"
-
-sort -u "$TMP" > "$SCAN"
-rm -f "$TMP"
+subfinder -t 9999 -silent -dL "$TARGETS" \
+| tr -d '\r' \
+| sed 's/\$//g; s/[[:space:]]*$//' \
+| sort -u > "$SCAN"
 
 # =====================
 # FIRST RUN → CREATE BASELINE
@@ -38,7 +35,7 @@ if [ ! -f "$BASE" ]; then
 fi
 
 # =====================
-# COMPARE
+# FIND NEW SUBDOMAINS
 # =====================
 comm -13 <(sort -u "$BASE") <(sort -u "$SCAN") > "$NEW"
 
@@ -46,29 +43,17 @@ comm -13 <(sort -u "$BASE") <(sort -u "$SCAN") > "$NEW"
 # IF NEW FOUND
 # =====================
 if [ -s "$NEW" ]; then
-  httpx -silent -t 9999 -sc -l "$NEW" > "$HTTP" || true
+  httpx -silent -t 999 -sc -l "$NEW" > "$HTTP" || true
 
-  # --- TELEGRAM ---
-  if [ -s "$HTTP" ]; then
-    notify -silent -id "$TG_ID" \
-      -data "$HTTP" \
-      -mf "🎯 NEW ASSET\n🆕 {{data}}\n⏰ $(date '+%F %T')"
-  else
-    notify -silent -id "$TG_ID" \
-      -mf "🎯 NEW ASSET\n🆕 $(cat $NEW)\n⏰ $(date '+%F %T')"
-  fi
+  notify -silent -id "$TG_ID" \
+    -i "$HTTP" \
 
-  # --- DESKTOP ---
-  MSG=$( [ -s "$HTTP" ] && cat "$HTTP" || cat "$NEW" )
-  "$POPUP" "🎯 Recon" "🆕 Subdomain baru:\n$MSG"
+  "$POPUP" "🎯 Recon" "🆕 Subdomain baru:\n$(cat "$NEW")"
 
-  # update baseline
+  # ⬇️ INI KUNCI NYA
   cat "$NEW" >> "$BASE"
   sort -u "$BASE" -o "$BASE"
 
 else
-  # =====================
-  # NO NEW
-  # =====================
   "$POPUP" "🎯 Recon" "✅ Tidak ada subdomain baru"
 fi
